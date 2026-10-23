@@ -1,0 +1,22 @@
+node_modules
+dist
+dist-portable
+src-tauri/target
+src-tauri/gen
+data
+*.log
+*.zip
+
+# 本地调试现场（截图/重绘素材/临时脚本），不参与构建
+/*.png
+/*.jpg
+redraw-2d
+redraw-3d
+redraw-plush
+redraw-real
+redraw-vector
+assets-src
+assets-package
+tools
+/*.py
+/*.mjs

@@ -1,0 +1,55 @@
+:root {
+  --bg: #fffaf3;
+  --bg-soft: #fff4e6;
+  --elev: #ffffff;
+  --hover: #fff4e6;
+  --line: rgba(176, 132, 92, 0.16);
+  --line-2: rgba(176, 132, 92, 0.28);
+  --text: #4a3c33;
+  --dim: #8d7a6c;
+  --faint: #b6a598;
+  --accent: #f5a623;
+  --accent-deep: #e08a00;
+  --danger: #e35d3c;
+  --warn: #d98700;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: "Microsoft YaHei UI", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+  font-feature-settings: "tnum";
+}
+
+#app { height: 100%; }
+
+input, textarea {
+  font-family: inherit;
+  font-size: 13px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+input::placeholder, textarea::placeholder { color: var(--faint); }
+
+button {
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  padding: 0;
+}
