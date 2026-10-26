@@ -42,6 +42,35 @@ const dueText = computed(() => {
   return `${dueLabel(t.due_at)}  ·  ${t.due_at.slice(5)}`
 })
 
+const editingDue = ref(false)
+const dueDraft = ref("")
+const dueBox = ref<HTMLInputElement | null>(null)
+
+function startDue() {
+  if (!todo.value) return
+  dueDraft.value = todo.value.due_at ?? ""
+  editingDue.value = true
+  nextTick(() => {
+    dueBox.value?.focus()
+    dueBox.value?.showPicker?.()
+  })
+}
+
+async function saveDue() {
+  if (!todo.value) return
+  const v = dueDraft.value || null
+  editingDue.value = false
+  if (v === todo.value.due_at) return
+  await api.update(props.id, todo.value.title, v)
+  todo.value.due_at = v
+}
+
+async function clearDue() {
+  if (!todo.value?.due_at) return
+  await api.update(props.id, todo.value.title, null)
+  todo.value.due_at = null
+}
+
 async function load() {
   const t = await api.get(props.id)
   todo.value = t
@@ -150,7 +179,20 @@ onMounted(() => {
           </span>
           <div class="val">
             <span>{{ createdText }} 创建</span>
-            <em v-if="dueText" :class="dueTone">{{ dueText }}</em>
+            <input
+              v-if="editingDue"
+              ref="dueBox"
+              v-model="dueDraft"
+              type="date"
+              class="due-input"
+              @change="saveDue"
+              @blur="editingDue = false"
+              @keydown.esc="editingDue = false"
+            />
+            <span v-else class="chip" :class="dueTone" @click="startDue">
+              {{ dueText || "无日期" }}
+              <b v-if="todo.due_at" class="clr" title="清除日期" @click.stop="clearDue">×</b>
+            </span>
           </div>
         </div>
 
@@ -369,13 +411,54 @@ h2.done { color: #b3a496; text-decoration: line-through; }
   flex-direction: column;
   align-items: flex-start;
 }
-.val em {
-  font-style: normal;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 1px;
+  padding: 1px 7px;
   font-size: 11.5px;
+  line-height: 18px;
   color: #b3a496;
+  border: 1px dashed #e3d4c3;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: color 140ms, border-color 140ms, background 140ms;
 }
-.val em.bad { color: var(--danger); }
-.val em.soon { color: var(--warn); }
+.chip:hover { color: #a9721a; border-color: var(--accent); background: #fff6ea; }
+.chip.bad { color: var(--danger); border-color: #f3c2b6; }
+.chip.soon { color: var(--warn); border-color: #f7d9a8; }
+
+.clr {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1;
+  color: #c9b8a8;
+  padding: 0 1px;
+  border-radius: 4px;
+}
+.clr:hover { color: var(--danger); background: #ffeeea; }
+
+.due-input {
+  width: 138px;
+  height: 22px;
+  margin-top: 1px;
+  padding: 0 5px;
+  font-family: inherit;
+  font-size: 11.5px;
+  color: var(--text);
+  background: #fff;
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  outline: none;
+  -webkit-app-region: no-drag;
+}
+.due-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+}
+.due-input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
 
 .desc {
   flex: 1;
