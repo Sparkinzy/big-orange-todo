@@ -19,6 +19,7 @@ assets-src
 assets-package
 tools
 _archive
+icon-gen
 /*.py
 /*.mjs
 
