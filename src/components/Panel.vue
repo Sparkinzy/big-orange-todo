@@ -10,7 +10,7 @@ import boxOn from "../assets/cat/box-on.png"
 import trashIcon from "../assets/cat/btn-trash.png"
 import closeIcon from "../assets/cat/btn-x.png"
 import sendIcon from "../assets/cat/btn-send.png"
-import ballIcon from "../assets/cat/badge-cat.png"
+import ballIcon from "../assets/cat/badge-cat-2.png"
 import catBody from "../assets/cat/cat-body.png"
 
 const props = defineProps<{
@@ -85,7 +85,7 @@ function metaText(t: Todo) {
       <img class="cling" :src="side === 'left' ? peekCatL : peekCatR" alt="" draggable="false" />
     </div>
 
-    <div v-else class="panel">
+    <div v-else class="panel" :style="{ '--from': side === 'left' ? '-100%' : '100%' }">
       <div class="topbar" data-tauri-drag-region>
         <span class="tico">
           <svg viewBox="0 0 16 16"><path d="M3.5 8.4 6.4 11.2 12.5 4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -210,12 +210,14 @@ function metaText(t: Todo) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: pop 200ms ease-out;
+  will-change: transform;
+  animation: slide-in 230ms cubic-bezier(0.22, 0.86, 0.24, 1) both;
 }
 
-@keyframes pop {
-  from { opacity: 0.35; transform: scale(0.992); }
-  to { opacity: 1; transform: scale(1); }
+/* 从吸附的那条屏幕边滑进来，而不是原地弹一下 */
+@keyframes slide-in {
+  from { transform: translateX(var(--from, 100%)); }
+  to { transform: translateX(0); }
 }
 
 .topbar {

@@ -15,6 +15,14 @@ let busy = false
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
+/** 等 n 帧，确保 WebView 已按新窗口尺寸重排 */
+const frames = (n: number) =>
+  new Promise<void>(resolve => {
+    let left = n
+    const tick = () => (--left <= 0 ? resolve() : requestAnimationFrame(tick))
+    requestAnimationFrame(tick)
+  })
+
 async function refresh() {
   todos.value = await api.list()
 }
@@ -102,9 +110,11 @@ async function expand() {
   if (busy) return
   busy = true
   try {
-    collapsed.value = false
-    await nextTick()
+    // 先把窗口撑到面板尺寸，等 WebView 完成重排，再插入面板
+    // 否则面板会先在 96×117 的小窗口里被挤压一帧，看起来就是抖一下
     await api.expand()
+    await frames(2)
+    collapsed.value = false
     repaint()
   } finally {
     busy = false
