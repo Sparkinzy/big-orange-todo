@@ -291,9 +291,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
             }
         });
 
-    if let Some(icon) = app.default_window_icon() {
-        builder = builder.icon(icon.clone());
-    }
+    builder = builder.icon(tauri::include_image!("icons/tray.png"));
     builder.build(app)?;
     Ok(())
 }

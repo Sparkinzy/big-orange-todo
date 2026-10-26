@@ -18,5 +18,9 @@ redraw-vector
 assets-src
 assets-package
 tools
+_archive
 /*.py
 /*.mjs
+
+# 图标源文件，需要进版本库，方便重新生成 icons
+!app-icon.png
