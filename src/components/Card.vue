@@ -39,7 +39,9 @@ const createdText = computed(() => todo.value?.created_at ?? "")
 const dueText = computed(() => {
   const t = todo.value
   if (!t || !t.due_at) return ""
-  return `${dueLabel(t.due_at)}  ·  ${t.due_at.slice(5)}`
+  const label = dueLabel(t.due_at)
+  const date = t.due_at.slice(5)
+  return label === date ? date : `${label}  ·  ${date}`
 })
 
 const editingDue = ref(false)
@@ -56,9 +58,9 @@ function startDue() {
   })
 }
 
-async function saveDue() {
+async function saveDue(e: Event) {
   if (!todo.value) return
-  const v = dueDraft.value || null
+  const v = (e.target as HTMLInputElement).value || null
   editingDue.value = false
   if (v === todo.value.due_at) return
   await api.update(props.id, todo.value.title, v)
