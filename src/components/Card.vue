@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue"
-import { listen } from "@tauri-apps/api/event"
+import { emit, listen } from "@tauri-apps/api/event"
 import type { Todo } from "../types"
 import { api } from "../api"
 import { daysLeft, dueLabel } from "../date"
@@ -83,6 +83,7 @@ async function load() {
       content.value = t.content ?? ""
     }
   }
+  emit("card-ready", props.id)
 }
 
 async function saveTitle() {
@@ -120,11 +121,6 @@ async function toggleDone() {
   await api.toggle(props.id, !todo.value.done_at)
 }
 
-async function remove() {
-  window.clearTimeout(saveTimer)
-  await api.remove(props.id)
-}
-
 async function close() {
   window.clearTimeout(saveTimer)
   if (todo.value) {
@@ -149,11 +145,7 @@ onMounted(() => {
     </div>
 
     <template v-else-if="todo">
-      <div class="dragbar" data-tauri-drag-region>
-        <button class="x" title="关闭" @click="close">
-          <svg viewBox="0 0 16 16"><path d="M4.6 4.6l6.8 6.8M11.4 4.6l-6.8 6.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-        </button>
-      </div>
+      <div class="dragbar" data-tauri-drag-region></div>
 
       <div class="hd">
         <button class="chk" :class="{ on: !!todo.done_at }" @click="toggleDone">
@@ -215,11 +207,11 @@ onMounted(() => {
       </div>
 
       <div class="ft">
-        <button class="btn" @click="remove">
+        <button class="btn" @click="close">
           <svg viewBox="0 0 20 20">
-            <path d="M4.5 6h11M8 6V4.2h4V6M6.2 6l.7 9.2h6.2L13.8 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.2 6.2l7.6 7.6M13.8 6.2l-7.6 7.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
           </svg>
-          删除
+          关闭
         </button>
         <button class="btn primary" @click="toggleDone">
           <svg viewBox="0 0 20 20"><path d="M5 10.6 8.3 14 15 6.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -242,7 +234,7 @@ onMounted(() => {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 6px 22px rgba(160, 110, 50, 0.16);
-  animation: fly-in 260ms cubic-bezier(0.18, 1.1, 0.32, 1) both;
+  animation: fly-in 190ms cubic-bezier(0.18, 1.1, 0.32, 1) both;
 }
 
 .card::after {
@@ -348,22 +340,6 @@ h2.done { color: #b3a496; text-decoration: line-through; }
   -webkit-app-region: no-drag;
 }
 
-.x {
-  position: absolute;
-  right: 8px;
-  top: 2px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #c0b0a0;
-  -webkit-app-region: no-drag;
-  transition: background 140ms, color 140ms;
-}
-.x svg { width: 14px; height: 14px; }
-.x:hover { background: #f6ece0; color: #8d7a6c; }
 
 .rows {
   flex: 1;

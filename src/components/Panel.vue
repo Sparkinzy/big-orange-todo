@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
+import { listen } from "@tauri-apps/api/event"
 import type { Todo } from "../types"
 import { api } from "../api"
 import { daysLeft, dueLabel, splitDue } from "../date"
@@ -32,6 +33,15 @@ const emit = defineEmits<{
 const draft = ref("")
 const tab = ref<"open" | "done">("open")
 const hoverId = ref<number | null>(null)
+/** 正在打开的卡片：卡片渲染完会回一个 card-ready，先把行切成「打开中」 */
+const openingId = ref<number | null>(null)
+
+onMounted(() => listen<number>("card-ready", () => (openingId.value = null)))
+
+function openCard(id: number) {
+  openingId.value = id
+  emit("open-card", id)
+}
 
 const openTodos = computed(() => props.todos.filter(t => !t.done_at))
 const doneCount = computed(() => props.todos.filter(t => !!t.done_at).length)
@@ -115,7 +125,7 @@ function metaText(t: Todo) {
               <img :src="t.done_at ? boxOn : boxOff" alt="" />
             </button>
 
-            <div class="body" @dblclick="emit('open-card', t.id)">
+            <div class="body" @dblclick="openCard(t.id)">
               <div class="line1">
                 <span class="title">{{ t.title }}</span>
                 <span v-if="t.due_at && !t.done_at" class="due" :class="dueClass(t)">{{ dueLabel(t.due_at) }}</span>
@@ -123,7 +133,8 @@ function metaText(t: Todo) {
               <div class="meta">{{ metaText(t) }}</div>
             </div>
 
-            <button v-if="hoverId === t.id" class="del" title="删除" @click="emit('remove', t.id)">
+            <span v-if="openingId === t.id" class="spin" title="打开中"></span>
+            <button v-else-if="hoverId === t.id" class="del" title="删除" @click="emit('remove', t.id)">
               <img :src="trashIcon" alt="" />
             </button>
           </li>
@@ -388,6 +399,20 @@ function metaText(t: Todo) {
 }
 .del img { width: 100%; height: 100%; display: block; }
 .del:hover { transform: scale(1.1); }
+
+/* 打开卡片时行尾的转圈：卡片窗口要几百毫秒才出内容，先让点击有回应 */
+.spin {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 4px;
+  border: 2px solid #f6e2c6;
+  border-top-color: #f5a623;
+  border-radius: 50%;
+  animation: spin 620ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.list li:has(.spin) .title { color: #b98444; }
 
 .empty {
   flex: 1;

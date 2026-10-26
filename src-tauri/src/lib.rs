@@ -147,6 +147,8 @@ fn spawn_card(app: &AppHandle, id: i64, pos: Option<(i32, i32)>) {
     if let Some(w) = app.get_webview_window(&label) {
         let _ = w.show();
         let _ = w.set_focus();
+        // 窗口本来就在，内容现成，直接告诉面板别转了
+        let _ = app.emit("card-ready", id);
         return;
     }
 
