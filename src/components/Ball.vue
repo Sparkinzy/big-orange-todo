@@ -3,7 +3,12 @@ import { computed } from "vue"
 import { getCurrentWindow } from "@tauri-apps/api/window"
 import type { Todo } from "../types"
 import { daysLeft } from "../date"
-import badgeCat from "../assets/cat/badge-cat.png"
+import badgeCat0 from "../assets/cat/badge-cat-0.png"
+import badgeCat1 from "../assets/cat/badge-cat-1.png"
+import badgeCat2 from "../assets/cat/badge-cat-2.png"
+import badgeCat3 from "../assets/cat/badge-cat-3.png"
+import badgeCat4 from "../assets/cat/badge-cat-4.png"
+import badgeCat5 from "../assets/cat/badge-cat-5.png"
 
 const props = defineProps<{ todos: Todo[] }>()
 const emit = defineEmits<{ (e: "open-panel"): void }>()
@@ -11,6 +16,10 @@ const emit = defineEmits<{ (e: "open-panel"): void }>()
 const open = computed(() => props.todos.filter(t => !t.done_at))
 const overdue = computed(() => open.value.filter(t => (daysLeft(t.due_at) ?? 1) < 0).length)
 const badge = computed(() => (overdue.value > 0 ? overdue.value : open.value.length))
+
+// 线团档位按未完成总数走：0 窝着睡 / 1-4 对应线团数 / 5 以上忙昏头
+const BADGE_CATS = [badgeCat0, badgeCat1, badgeCat2, badgeCat3, badgeCat4, badgeCat5]
+const badgeImg = computed(() => BADGE_CATS[Math.min(open.value.length, 5)])
 
 let down = false
 let moved = false
@@ -41,7 +50,7 @@ function onUp() {
 
 <template>
   <div class="ball" @mousedown="onDown" @mousemove="onMove" @mouseup="onUp">
-    <img class="core" :src="badgeCat" alt="" draggable="false" />
+    <img class="core" :src="badgeImg" alt="" draggable="false" />
     <span v-if="badge > 0" class="badge" :class="{ warn: overdue > 0 }">{{ badge > 99 ? "99+" : badge }}</span>
   </div>
 </template>
